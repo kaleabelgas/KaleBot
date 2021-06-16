@@ -41,12 +41,12 @@ namespace KaleBot.Services
 
             _service.CommandExecuted += OnCommandExecuted;
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
-            await _client.SetActivityAsync(new Game("Watching over my dominions", ActivityType.Playing, ActivityProperties.None, "Ruling with an iron fist"));
+            await _client.SetActivityAsync(new Game("Watching over my dominions", ActivityType.Playing, ActivityProperties.None));
         }
 
         private async Task SnipeGet(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
-
+            await arg2.SendMessageAsync($"Deleted Message: {LastMessage.Content}");
         }
 
         private async Task SnipeCache(SocketMessage arg)
