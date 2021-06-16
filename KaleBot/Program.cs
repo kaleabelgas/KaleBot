@@ -47,7 +47,7 @@ namespace KaleBot
                 .UseCommandService((context, config) =>
                 {
                     config.CaseSensitiveCommands = false;
-                    config.LogLevel = LogSeverity.Verbose;
+                    config.LogLevel = LogSeverity.Debug;
                     config.DefaultRunMode = RunMode.Sync;
                 })
                 .ConfigureServices((context, services) =>

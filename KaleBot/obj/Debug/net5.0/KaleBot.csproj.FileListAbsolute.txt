@@ -62,3 +62,8 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Pomelo.EntityFrameworkC
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Infrastructure.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Infrastructure.pdb
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.PlatformServices.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Core.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.YouTube.v3.dll
