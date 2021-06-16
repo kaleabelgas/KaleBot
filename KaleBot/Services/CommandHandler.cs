@@ -20,6 +20,8 @@ namespace KaleBot.Services
         private readonly IConfiguration _config;
         private readonly Servers _servers;
 
+        public SocketUserMessage LastMessage { get; private set; }
+
         public CommandHandler(IServiceProvider provider, DiscordSocketClient client, CommandService service, IConfiguration config, Servers servers)
         {
             _provider = provider;
@@ -32,12 +34,28 @@ namespace KaleBot.Services
         public override async Task InitializeAsync(CancellationToken cancellationToken)
         {
             _client.MessageReceived += OnMessageReceived;
+            _client.MessageReceived += SnipeCache;
+            _client.MessageDeleted += SnipeGet;
             _client.ChannelCreated += OnChannelCreated;
             _client.ReactionAdded += OnReactionAdded;
 
             _service.CommandExecuted += OnCommandExecuted;
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
+            await _client.SetActivityAsync(new Game("Watching over my dominions", ActivityType.Playing, ActivityProperties.None, "Ruling with an iron fist"));
         }
+
+        private async Task SnipeGet(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
+        {
+
+        }
+
+        private async Task SnipeCache(SocketMessage arg)
+        {
+            var lastMessage = arg as SocketUserMessage;
+            LastMessage = lastMessage;
+        }
+
+
 
         private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> arg1, ISocketMessageChannel arg2, SocketReaction arg3)
         {
@@ -69,7 +87,7 @@ namespace KaleBot.Services
 
         private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (command.IsSpecified && !result.IsSuccess) await context.Channel.SendMessageAsync($"Error: {result}");
+            if (command.IsSpecified && !result.IsSuccess) Console.WriteLine(result);
         }
     }
 }

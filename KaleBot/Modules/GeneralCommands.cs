@@ -6,8 +6,10 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
+using Google.Apis;
 using Infrastructure;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace KaleBot.Modules
 {
@@ -23,9 +25,10 @@ namespace KaleBot.Modules
         }
 
         [Command("ping")]
+        [Alias("p")]
         public async Task PingAsync()
         {
-            await ReplyAsync("Pong!");
+            await ReplyAsync("Pong! " + Context.Client.Latency + "ms");
             _logger.LogInformation($"{Context.User.Username} executed the ping command!");
         }
 
@@ -49,15 +52,15 @@ namespace KaleBot.Modules
         [Command("ssay")]
         public async Task Spam(string text, int amount = 1)
         {
-            if(amount < 1)
+            if (amount < 1)
             {
                 await ReplyAsync("bruh dont break the bot");
             }
-            else if(amount > 10)
+            else if (amount > 10)
             {
                 await ReplyAsync("smh");
             }
-            else if(Context.Message.MentionedUsers.Count > 0)
+            else if (Context.Message.MentionedUsers.Count > 0)
             {
                 for (int i = 0; i < amount; i++)
                 {
@@ -78,14 +81,14 @@ namespace KaleBot.Modules
         [RequireUserPermission(Discord.ChannelPermission.ManageRoles)]
         public async Task Prefix(string prefix = null)
         {
-            if(prefix == null)
+            if (prefix == null)
             {
                 var guildPrefix = await _servers.GetGuildPrefix(Context.Guild.Id) ?? "?";
                 await ReplyAsync($"Current prefix: `{guildPrefix}`");
                 return;
             }
 
-            if(prefix.Length > 5)
+            if (prefix.Length > 5)
             {
                 await ReplyAsync($"Prefix too long! Use string <= 8 characters");
             }
@@ -94,9 +97,10 @@ namespace KaleBot.Modules
             await ReplyAsync($"Prefix changed to `{prefix}`");
         }
         [Command("info")]
+        [Alias("i")]
         public async Task Info(SocketGuildUser user = null)
         {
-            if(user == null)
+            if (user == null)
             {
                 var builder = new EmbedBuilder()
                     .WithTitle("Info")
@@ -128,28 +132,82 @@ namespace KaleBot.Modules
             }
         }
 
+        [Command("server")]
+        public async Task Server()
+        {
+            var builder = new EmbedBuilder()
+                .WithTitle("Server Info")
+                .WithThumbnailUrl(Context.Guild.IconUrl)
+                .AddField("Created on", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
+                .AddField("Members", (Context.Guild as SocketGuild).MemberCount, true)
+                .AddField($"Roles: {(Context.Guild as SocketGuild).Roles.Count}", string.Join(" ", (Context.Guild as SocketGuild).Roles.Select(x => x.Mention)), true);
+            var embed = builder.Build();
+            await ReplyAsync(null, false, embed);
+        }
+
         [Command("appreciate")]
         public async Task Appreciate(SocketGuildUser user)
         {
             await ReplyAsync($"We appreciate you {user.Mention}! <3");
         }
 
-        [Command("yt")]
-        public async Task YouTube(string query)
+        [Command("yts")]
+        public async Task YouTubeList([Remainder] string query = "")
         {
+            if (string.IsNullOrEmpty(query))
+            {
+                await ReplyAsync("gotta put in at least something");
+                return;
+            }
+
             var youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {
                 ApiKey = "AIzaSyA9MwwtfSa5oXUrPfdoKK85V05-zlRn7qo",
                 ApplicationName = this.GetType().ToString()
+
             });
 
             var searchRequest = youtubeService.Search.List("snippet");
-            searchRequest.Q = query;
-            searchRequest.MaxResults = 1;
 
+            searchRequest.Q = query;
+
+            searchRequest.MaxResults = 5;
             var searchResponse = await searchRequest.ExecuteAsync();
 
-            await ReplyAsync($"{searchResponse.Items[0].Snippet.Title}{searchResponse.Items[0].Id.VideoId}");
+            List<string> responses = new List<string>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                responses.Add($"{i + 1}. {searchResponse.Items[i].Snippet.Title} \n <https://www.youtube.com/watch?v={searchResponse.Items[i].Id.VideoId}>");
+            }
+            string allResponses = string.Join("\n", responses.ToArray());
+
+            await ReplyAsync(allResponses.ToString());
+        }
+        [Command("yt")]
+        public async Task YouTube([Remainder] string query = "")
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                await ReplyAsync("gotta put in at least something");
+                return;
+            }
+
+            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                ApiKey = "AIzaSyA9MwwtfSa5oXUrPfdoKK85V05-zlRn7qo",
+                ApplicationName = this.GetType().ToString()
+
+            });
+
+            var searchRequest = youtubeService.Search.List("snippet");
+
+            searchRequest.Q = query;
+
+            searchRequest.MaxResults = 11;
+            var searchResponse = await searchRequest.ExecuteAsync();
+
+            await ReplyAsync($"{searchResponse.Items[0].Snippet.Title} \n https://www.youtube.com/watch?v={searchResponse.Items[0].Id.VideoId}");
         }
     }
 }
