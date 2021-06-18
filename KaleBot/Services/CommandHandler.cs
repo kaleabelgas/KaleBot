@@ -9,10 +9,11 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Infrastructure;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace KaleBot.Services
 {
-    public class CommandHandler : InitializedService
+    public class CommandHandler : DiscordClientService
     {
         private readonly IServiceProvider _provider;
         private readonly DiscordSocketClient _client;
@@ -20,39 +21,54 @@ namespace KaleBot.Services
         private readonly IConfiguration _config;
         private readonly Servers _servers;
 
-        public SocketUserMessage LastMessage { get; private set; }
+        public static SocketUserMessage LastMessage { get; private set; }
 
-        public CommandHandler(IServiceProvider provider, DiscordSocketClient client, CommandService service, IConfiguration config, Servers servers)
+        public CommandHandler(DiscordSocketClient client, ILogger<CommandHandler> logger, IServiceProvider provider, CommandService commandService, IConfiguration config, Servers servers) : base(client, logger)
         {
             _provider = provider;
-            _client = client;
-            _service = service;
+            _service = commandService;
             _config = config;
             _servers = servers;
+            _client = client;
         }
 
-        public override async Task InitializeAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _client.MessageReceived += OnMessageReceived;
-            _client.MessageReceived += SnipeCache;
-            _client.MessageDeleted += SnipeGet;
+            _client.MessageDeleted += SnipeSet;
+            _client.MessageDeleted += GhostPingDetect;
             _client.ChannelCreated += OnChannelCreated;
             _client.ReactionAdded += OnReactionAdded;
-
             _service.CommandExecuted += OnCommandExecuted;
+            _client.Connected += SetActivity;
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
-            await _client.SetActivityAsync(new Game("Watching over my dominions", ActivityType.Playing, ActivityProperties.None));
         }
 
-        private async Task SnipeGet(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
+        private async Task SetActivity()
         {
-            await arg2.SendMessageAsync($"Deleted Message: {LastMessage.Content}");
+            await _client.SetGameAsync($"?help; watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
+
         }
 
-        private async Task SnipeCache(SocketMessage arg)
+        private async Task GhostPingDetect(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
-            var lastMessage = arg as SocketUserMessage;
-            LastMessage = lastMessage;
+            if((arg1.Value as SocketUserMessage).MentionedUsers.Count < 1) { return; }
+
+            var builder = new EmbedBuilder()
+                .WithTitle("Ghost ping detected!")
+                .AddField("Sender", (arg1.Value as SocketUserMessage).Author.Mention, false)
+                .AddField("Message", (arg1.Value as SocketUserMessage).Content.ToString(), false)
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp();
+
+            var embed = builder.Build();
+            await (arg2 as ITextChannel).SendMessageAsync(null, false, embed);
+        }
+
+        private async Task SnipeSet(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
+        {
+            LastMessage = arg1.Value as SocketUserMessage;
+            //await arg2.SendMessageAsync($"Deleted Message: {(arg1.Value as SocketMessage).Content}");
         }
 
 

@@ -4,57 +4,27 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
-using Google.Apis;
 using Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using KaleBot.Services;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using Google.Apis;
+using System;
 
 namespace KaleBot.Modules
 {
     public class GeneralCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly ILogger<GeneralCommands> _logger;
-        private readonly Servers _servers;
+        private static Dictionary<SocketGuildUser, SocketMessage> harassList = new Dictionary<SocketGuildUser, SocketMessage>();
 
-        public GeneralCommands(ILogger<GeneralCommands> logger, Servers servers)
-        {
-            _logger = logger;
-            _servers = servers;
-        }
-
-        [Command("ping")]
-        [Alias("p")]
-        public async Task PingAsync()
-        {
-            await ReplyAsync("Pong! " + Context.Client.Latency + "ms");
-            _logger.LogInformation($"{Context.User.Username} executed the ping command!");
-        }
-
-        [Command("echo")]
-        public async Task EchoAsync([Remainder] string text)
-        {
-            await ReplyAsync(text);
-            _logger.LogInformation($"{Context.User.Username} executed the echo command!");
-        }
-
-        [Command("math")]
-        public async Task MathAsync([Remainder] string math)
-        {
-            var dt = new DataTable();
-            var result = dt.Compute(math, null);
-
-            await ReplyAsync($"Result: {result}");
-            _logger.LogInformation($"{Context.User.Username} executed the math command!");
-        }
-
-        [Command("ssay")]
-        public async Task Spam(string text, int amount = 1)
+        [Command("say")]
+        public async Task Say(string text, int amount = 1)
         {
             if (amount < 1)
             {
-                await ReplyAsync("bruh dont break the bot");
+                await ReplyAsync("Tryna break me, are ya?");
             }
             else if (amount > 10)
             {
@@ -64,7 +34,7 @@ namespace KaleBot.Modules
             {
                 for (int i = 0; i < amount; i++)
                 {
-                    await ReplyAsync(Context.User.Mention + "is bad!!!");
+                    await ReplyAsync(Context.User.Mention + " tried to ping smh");
                 }
             }
             else
@@ -76,79 +46,27 @@ namespace KaleBot.Modules
 
             }
         }
-
-        [Command("prefix")]
-        [RequireUserPermission(Discord.ChannelPermission.ManageRoles)]
-        public async Task Prefix(string prefix = null)
-        {
-            if (prefix == null)
-            {
-                var guildPrefix = await _servers.GetGuildPrefix(Context.Guild.Id) ?? "?";
-                await ReplyAsync($"Current prefix: `{guildPrefix}`");
-                return;
-            }
-
-            if (prefix.Length > 5)
-            {
-                await ReplyAsync($"Prefix too long! Use string <= 8 characters");
-            }
-
-            await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
-            await ReplyAsync($"Prefix changed to `{prefix}`");
-        }
-        [Command("info")]
-        [Alias("i")]
-        public async Task Info(SocketGuildUser user = null)
-        {
-            if (user == null)
-            {
-                var builder = new EmbedBuilder()
-                    .WithTitle("Info")
-                    .WithThumbnailUrl(Context.User.GetAvatarUrl())
-                    .WithDescription($"User Info for {Context.User.Username}")
-                    .AddField($"User", Context.User, true)
-                    .AddField($"Roles", string.Join(" ", (Context.User as SocketGuildUser).Roles.Select(x => x.Mention)))
-                    .AddField($"Created at", Context.User.CreatedAt.ToString("MM/dd/yyyy"))
-                    .AddField($"Joined at", (Context.User as SocketGuildUser).JoinedAt.Value.ToString("MM/dd/yyyy"), true)
-                    .WithCurrentTimestamp();
-
-                var embed = builder.Build();
-                await ReplyAsync(null, false, embed);
-            }
-            else
-            {
-                var builder = new EmbedBuilder()
-                    .WithTitle("Info")
-                    .WithThumbnailUrl(user.GetAvatarUrl())
-                    .WithDescription($"User Info for {user.Username}")
-                    .AddField($"User", user.Username, true)
-                    .AddField($"Roles", string.Join(" ", user.Roles.Select(x => x.Mention)))
-                    .AddField($"Created at", user.CreatedAt.ToString("MM/dd/yyyy"))
-                    .AddField($"Joined at", user.JoinedAt.Value.ToString("MM/dd/yyyy"), true)
-                    .WithCurrentTimestamp();
-
-                var embed = builder.Build();
-                await ReplyAsync(null, false, embed);
-            }
-        }
-
-        [Command("server")]
-        public async Task Server()
-        {
-            var builder = new EmbedBuilder()
-                .WithTitle("Server Info")
-                .WithThumbnailUrl(Context.Guild.IconUrl)
-                .AddField("Created on", Context.Guild.CreatedAt.ToString("MM/dd/yyyy"), true)
-                .AddField("Members", (Context.Guild as SocketGuild).MemberCount, true)
-                .AddField($"Roles: {(Context.Guild as SocketGuild).Roles.Count}", string.Join(" ", (Context.Guild as SocketGuild).Roles.Select(x => x.Mention)), true);
-            var embed = builder.Build();
-            await ReplyAsync(null, false, embed);
-        }
-
         [Command("appreciate")]
         public async Task Appreciate(SocketGuildUser user)
         {
-            await ReplyAsync($"We appreciate you {user.Mention}! <3");
+            if(user.Mention == Context.Client.CurrentUser.Mention)
+            {
+                await ReplyAsync("Aww, thanks! Just doing my best.");
+                return;
+            }
+            await ReplyAsync($"We appreciate you {user.Mention}! ❤️");
+        }
+
+        [Command("Harass")]
+        public async Task StartHarass(SocketGuildUser user, [Remainder]SocketMessage message)
+        {
+            harassList.Add(user, message);
+            Context.Client.MessageReceived += Harass;
+        }
+
+        public async Task Harass(SocketMessage message)
+        {
+            await ReplyAsync($"{harassList[message.Author as SocketGuildUser]}");
         }
 
         [Command("yts")]
@@ -156,7 +74,7 @@ namespace KaleBot.Modules
         {
             if (string.IsNullOrEmpty(query))
             {
-                await ReplyAsync("gotta put in at least something");
+                await ReplyAsync("Gotta put in at least something");
                 return;
             }
 
@@ -184,12 +102,13 @@ namespace KaleBot.Modules
 
             await ReplyAsync(allResponses.ToString());
         }
+
         [Command("yt")]
         public async Task YouTube([Remainder] string query = "")
         {
             if (string.IsNullOrEmpty(query))
             {
-                await ReplyAsync("gotta put in at least something");
+                await ReplyAsync("Gotta put in at least something");
                 return;
             }
 
@@ -209,5 +128,53 @@ namespace KaleBot.Modules
 
             await ReplyAsync($"{searchResponse.Items[0].Snippet.Title} \n https://www.youtube.com/watch?v={searchResponse.Items[0].Id.VideoId}");
         }
+
+
+        [Command("snipe")]
+        public async Task Snipe()
+        {
+            if (CommandHandler.LastMessage == null)
+            {
+                await ReplyAsync("There's nothing to snipe!");
+                return;
+            }
+            await ReplyAsync($"Deleted Message by {CommandHandler.LastMessage.Author.Mention}: {CommandHandler.LastMessage.Content}");
+        }
+
+        [Command("kill")]
+        public async Task Kill([Remainder]SocketGuildUser user)
+        {
+            if(user == null)
+            {
+                await ReplyAsync("You have to tag someone, idot!");
+                return;
+            }
+
+            await ReplyAsync($"{Context.User.Mention} just killed {user.Mention}, so sad.");
+        }
+
+        [Command("thx")]
+        public async Task Thx([Remainder]string args = "")
+        {
+            if (string.IsNullOrEmpty(args))
+            {
+                await ReplyAsync("Thx? Thx what?");
+                return;
+            }
+            await ReplyAsync("Eh, I can't do that (yet). May run into copyright issues as well.");
+        }
+
+        [Command("mock")]
+        public async Task Mock([Remainder]string msg = "")
+        {
+            if (string.IsNullOrEmpty(msg)) return;
+            var randomizer = new Random();
+            var final =
+                msg.Select(x => randomizer.Next() % 2 == 0 ?
+                (char.IsUpper(x) ? x.ToString().ToLower().First() : x.ToString().ToUpper().First()) : x);
+            var randomUpperLower = new string(final.ToArray());
+            await ReplyAsync(randomUpperLower);
+        }
+
     }
 }
