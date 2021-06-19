@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +10,7 @@ using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 using Infrastructure;
+using KaleBot.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -20,6 +23,7 @@ namespace KaleBot.Services
         private readonly CommandService _service;
         private readonly IConfiguration _config;
         private readonly Servers _servers;
+        public static List<Mute> Mutes = new List<Mute>();
 
         public static SocketUserMessage LastMessage { get; private set; }
 
@@ -39,19 +43,24 @@ namespace KaleBot.Services
             _client.MessageDeleted += GhostPingDetect;
             _client.ChannelCreated += OnChannelCreated;
             _client.ReactionAdded += OnReactionAdded;
-            _service.CommandExecuted += OnCommandExecuted;
             _client.Connected += SetActivity;
+            _service.CommandExecuted += OnCommandExecuted;
+
+            var newTask = new Task(async () => await MuteHandler());
+            newTask.Start();
+
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
         }
 
         private async Task SetActivity()
         {
-            await _client.SetGameAsync($"?help; watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
+            await _client.SetGameAsync($"?help: watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
 
         }
 
         private async Task GhostPingDetect(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
+            if ((arg1.Value as SocketUserMessage) == null) return;
             if((arg1.Value as SocketUserMessage).MentionedUsers.Count < 1) { return; }
 
             var builder = new EmbedBuilder()
@@ -68,6 +77,7 @@ namespace KaleBot.Services
         private async Task SnipeSet(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
             LastMessage = arg1.Value as SocketUserMessage;
+            await Task.CompletedTask;
             //await arg2.SendMessageAsync($"Deleted Message: {(arg1.Value as SocketMessage).Content}");
         }
 
@@ -90,6 +100,7 @@ namespace KaleBot.Services
 
         private async Task OnMessageReceived(SocketMessage arg)
         {
+            //bool bruh = (arg is SocketUserMessage message);
             if (!(arg is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
@@ -104,6 +115,50 @@ namespace KaleBot.Services
         private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
             if (command.IsSpecified && !result.IsSuccess) Console.WriteLine(result);
+            await Task.CompletedTask;
+        }
+
+        private async Task MuteHandler()
+        {
+            List<Mute> Remove = new List<Mute>();
+
+            foreach (var mute in Mutes)
+            {
+                if (DateTime.Now < mute.End)
+                    continue;
+
+                var guild = _client.GetGuild(mute.Guild.Id);
+
+                if (guild.GetRole(mute.Role.Id) == null)
+                {
+                    Remove.Add(mute);
+                    continue;
+                }
+
+                var role = guild.GetRole(mute.Role.Id);
+
+                if (guild.GetUser(mute.User.Id) == null)
+                {
+                    Remove.Add(mute);
+                    continue;
+                }
+
+                var user = guild.GetUser(mute.User.Id);
+
+                if (role.Position > guild.CurrentUser.Hierarchy)
+                {
+                    Remove.Add(mute);
+                    continue;
+                }
+
+                await user.RemoveRoleAsync(mute.Role);
+                Remove.Add(mute);
+            }
+
+            Mutes = Mutes.Except(Remove).ToList();
+
+            await Task.Delay(1 * 60 * 1000);
+            await MuteHandler();
         }
     }
 }

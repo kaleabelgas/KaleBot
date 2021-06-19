@@ -67,3 +67,4 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\ref\KaleBot.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.pdb
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.genruntimeconfig.cache
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\Victoria.dll

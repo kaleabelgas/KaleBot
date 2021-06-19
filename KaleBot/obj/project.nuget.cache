@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "YYJ/dg12wLHdaeC/Uzro0PRMp0ap3Ax09YKPt/GPuKtE6FaLmidh9Nxmu+pSff2PNlyciaJxgxdq6F3T7Rm3ZQ==",
+  "dgSpecHash": "CYOSYYyE1nuhwC58kYF3QSoEz9tEaWhwQj8O35P1LEoslJ3FTdXFGV+RJTs4sWluc8Ic4Prq2q/txa3ZgivNUg==",
   "success": true,
   "projectFilePath": "D:\\Users\\Kale\\Documents\\KaleBot\\KaleBot\\KaleBot.csproj",
   "expectedPackageFiles": [
@@ -58,7 +58,8 @@
     "C:\\Users\\kalej\\.nuget\\packages\\system.interactive.async\\4.0.0\\system.interactive.async.4.0.0.nupkg.sha512",
     "C:\\Users\\kalej\\.nuget\\packages\\system.linq.async\\4.0.0\\system.linq.async.4.0.0.nupkg.sha512",
     "C:\\Users\\kalej\\.nuget\\packages\\system.security.accesscontrol\\5.0.0\\system.security.accesscontrol.5.0.0.nupkg.sha512",
-    "C:\\Users\\kalej\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512"
+    "C:\\Users\\kalej\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
+    "C:\\Users\\kalej\\.nuget\\packages\\victoria\\5.1.11\\victoria.5.1.11.nupkg.sha512"
   ],
   "logs": []
 }

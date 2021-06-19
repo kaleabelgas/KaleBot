@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using KaleBot.Services;
 using Infrastructure;
+using KaleBot.Utilities;
 
 namespace KaleBot
 {
@@ -31,13 +32,13 @@ namespace KaleBot
                 .ConfigureLogging(x =>
                 {
                     x.AddConsole();
-                    x.SetMinimumLevel(LogLevel.Debug); // Defines what kind of information should be logged (e.g. Debug, Information, Warning, Critical) adjust this to your liking
+                    x.SetMinimumLevel(LogLevel.Information); // Defines what kind of information should be logged (e.g. Debug, Information, Warning, Critical) adjust this to your liking
                 })
                 .ConfigureDiscordHost((context, config) =>
                 {
                     config.SocketConfig = new DiscordSocketConfig
                     {
-                        LogLevel = LogSeverity.Verbose, // Defines what kind of information should be logged from the API (e.g. Verbose, Info, Warning, Critical) adjust this to your liking
+                        LogLevel = LogSeverity.Info, // Defines what kind of information should be logged from the API (e.g. Verbose, Info, Warning, Critical) adjust this to your liking
                         AlwaysDownloadUsers = true,
                         MessageCacheSize = 200,
                     };
@@ -47,14 +48,18 @@ namespace KaleBot
                 .UseCommandService((context, config) =>
                 {
                     config.CaseSensitiveCommands = false;
-                    config.LogLevel = LogSeverity.Debug;
+                    config.LogLevel = LogSeverity.Info;
                     config.DefaultRunMode = RunMode.Sync;
                 })
                 .ConfigureServices((context, services) =>
                 {
                     services.AddHostedService<CommandHandler>()
                     .AddDbContext<KaleBotContext>()
-                    .AddSingleton<Servers>();
+                    .AddSingleton<Servers>()
+                    .AddSingleton<Ranks>()
+                    .AddSingleton<AutoRoles>()
+                    .AddSingleton<RanksHelper>()
+                    .AddSingleton<AutoRolesHelper>();
                 })
                 .UseConsoleLifetime();
 

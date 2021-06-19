@@ -157,6 +157,10 @@
             "Microsoft.Extensions.Logging": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "Victoria": {
+              "target": "Package",
+              "version": "[5.1.11, )"
             }
           },
           "imports": [

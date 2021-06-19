@@ -8,6 +8,8 @@ using Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using KaleBot.Services;
+using KaleBot.Utilities;
+using System;
 
 namespace KaleBot.Modules
 {
@@ -15,10 +17,12 @@ namespace KaleBot.Modules
     {
         private readonly ILogger<UtilityCommands> _logger;
         private readonly Servers _servers;
+        private readonly RanksHelper _ranksHelper;
 
-        public UtilityCommands(ILogger<UtilityCommands> logger, Servers servers)
+        public UtilityCommands(ILogger<UtilityCommands> logger, Servers servers, RanksHelper ranksHelper)
         {
             _logger = logger;
+            _ranksHelper = ranksHelper;
             _servers = servers;
         }
 
@@ -30,7 +34,7 @@ namespace KaleBot.Modules
             {
                 var _builder = new EmbedBuilder()
                     .WithTitle("KaleBot Help")
-                    .WithDescription($"For more information about a command, use {guildPrefix} + command")
+                    .WithDescription($"For more information about a command, use {guildPrefix}help + command")
                     .AddField("Available Commands",
                     $"> ping\n" +
                     $"> prefix\n" +
@@ -41,7 +45,8 @@ namespace KaleBot.Modules
                     $"> snipe\n", true)
                     .WithColor(Color.DarkBlue)
                     .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl())
-                    .WithCurrentTimestamp();
+                    .WithCurrentTimestamp()
+                    .WithFooter(Context.Guild.Name.ToString());
                 var _embed = _builder.Build();
                 await ReplyAsync(null, false, _embed);
                 return;
@@ -88,7 +93,8 @@ namespace KaleBot.Modules
                 .WithTitle(query)
                 .WithDescription($"> {info}")
                 .WithColor(Color.DarkBlue)
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp()
+                .WithFooter(Context.Guild.Name.ToString());
             if (commandValid) builder.AddField("Usage", $"`{guildPrefix}{query}{addInfo}`");
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
@@ -112,25 +118,7 @@ namespace KaleBot.Modules
             _logger.LogInformation($"{Context.User.Username} executed the math command!");
         }
 
-        [Command("prefix")]
-        [RequireUserPermission(Discord.ChannelPermission.ManageRoles)]
-        public async Task Prefix(string prefix = null)
-        {
-            if (prefix == null)
-            {
-                var guildPrefix = await _servers.GetGuildPrefix(Context.Guild.Id) ?? "?";
-                await ReplyAsync($"Current prefix: `{guildPrefix}`");
-                return;
-            }
-
-            if (prefix.Length > 5)
-            {
-                await ReplyAsync($"Prefix too long! Use string <= 8 characters");
-            }
-
-            await _servers.ModifyGuildPrefix(Context.Guild.Id, prefix);
-            await ReplyAsync($"Prefix changed to `{prefix}`");
-        }
+        
         /// <summary>
         /// Gets info of user.
         /// </summary>
@@ -150,7 +138,8 @@ namespace KaleBot.Modules
                     .AddField($"Roles", string.Join(" ", (Context.User as SocketGuildUser).Roles.Select(x => x.Mention)))
                     .AddField($"Created at", Context.User.CreatedAt.ToString("MM/dd/yyyy"))
                     .AddField($"Joined at", (Context.User as SocketGuildUser).JoinedAt.Value.ToString("MM/dd/yyyy"), true)
-                    .WithCurrentTimestamp();
+                    .WithCurrentTimestamp()
+                    .WithFooter(Context.Guild.Name.ToString());
 
                 var embed = builder.Build();
                 await ReplyAsync(null, false, embed);
@@ -165,7 +154,8 @@ namespace KaleBot.Modules
                     .AddField($"Roles", string.Join(" ", user.Roles.Select(x => x.Mention)))
                     .AddField($"Created at", user.CreatedAt.ToString("MM/dd/yyyy"))
                     .AddField($"Joined at", user.JoinedAt.Value.ToString("MM/dd/yyyy"), true)
-                    .WithCurrentTimestamp();
+                    .WithCurrentTimestamp()
+                    .WithFooter(Context.Guild.Name.ToString());
 
                 var embed = builder.Build();
                 await ReplyAsync(null, false, embed);
@@ -186,7 +176,8 @@ namespace KaleBot.Modules
                 .AddField("Text Channels", Context.Guild.TextChannels.Count, true)
                 .AddField("Voice Channels", Context.Guild.VoiceChannels.Count, true)
                 .AddField("Roles", Context.Guild.Roles.Count, true)
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp()
+                .WithFooter(Context.Guild.Name.ToString());
             var embed = builder.Build();
             await Context.Channel.SendMessageAsync(null, false, embed);
         }
@@ -204,11 +195,60 @@ namespace KaleBot.Modules
             var builder = new EmbedBuilder()
                 .WithTitle("Interested in our bot? Here are some links!")
                 .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl())
-                .AddField("Links", "[Github](https://github.com/kaleabelgas/KaleBot)", true)
+                .AddField("Links", $"[Github](https://github.com/kaleabelgas/KaleBot)\n" +
+                $"[Discord](https://discord.gg/JkF6BJEAeC)", true)
                 .WithColor(Color.DarkBlue)
-                .WithCurrentTimestamp();
+                .WithCurrentTimestamp()
+                .WithFooter(Context.Guild.Name.ToString());
             var embed = builder.Build();
-            await ReplyAsync("https://discord.gg/JkF6BJEAeC", false, embed);
+            await ReplyAsync(null, false, embed);
+        }
+
+        [Command("rank", RunMode = RunMode.Async)]
+        [RequireBotPermission(GuildPermission.ManageRoles)]
+        public async Task Rank([Remainder]string identifier)
+        {
+            await Context.Channel.TriggerTypingAsync();
+
+            var ranks = await _ranksHelper.GetRanksAsync(Context.Guild);
+
+            IRole role;
+
+            if(ulong.TryParse(identifier, out ulong roleId))
+            {
+                var roleById = Context.Guild.Roles.FirstOrDefault(x => x.Id == roleId);
+                if(roleById == null)
+                {
+                    await ReplyAsync("Role does not exist!");
+                    return;
+                }
+                role = roleById;
+            }
+            else
+            {
+                var roleByName = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, identifier, StringComparison.CurrentCultureIgnoreCase));
+                if(roleByName == null)
+                {
+                    await ReplyAsync("Role does not exist!");
+                    return;
+                }
+                role = roleByName;
+            }
+
+            if(ranks.All(x => x.Id != role.Id))
+            {
+                await ReplyAsync("That rank does not exist!");
+                return;
+            }
+
+            if((Context.User as SocketGuildUser).Roles.Any(x => x.Id == role.Id))
+            {
+                await (Context.User as SocketGuildUser).RemoveRoleAsync(role);
+                await ReplyAsync($"Successfully removed rank {role.Mention} from you.");
+                return;
+            }
+            await (Context.User as SocketGuildUser).AddRoleAsync(role);
+            await ReplyAsync($"Successfully added rank {role.Mention} to you.");
         }
     }
 }

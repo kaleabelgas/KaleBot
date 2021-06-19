@@ -67,3 +67,4 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.Platfo
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Core.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.YouTube.v3.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Victoria.dll
