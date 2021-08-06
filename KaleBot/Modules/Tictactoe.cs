@@ -16,11 +16,11 @@ namespace KaleBot.Modules
         private bool _player1Turn;
         private int[,] _board;
 
-        public Tictactoe(SocketGuildUser player1, SocketGuildUser player2)
-        {
-            _player1 = player1;
-            _player2 = player2;
-        }
+        //public Tictactoe(SocketGuildUser player1, SocketGuildUser player2)
+        //{
+        //    _player1 = player1;
+        //    _player2 = player2;
+        //}
 
         public async Task ReveiveInput(SocketMessage args)
         {

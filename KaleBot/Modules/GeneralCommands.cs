@@ -112,14 +112,43 @@ namespace KaleBot.Modules
 
             if (CommandHandler.HarassList.ContainsKey(id))
             {
-                CommandHandler.HarassList[id] = message;
+                CommandHandler.HarassList[id].HarassEmote = message;
+                CommandHandler.HarassList[id].Harasser = Context.Message.Author.Id;
 
                 File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.HarassList));
                 return;
             }
-            CommandHandler.HarassList.Add(id, message);
+
+            var valuePair = new ValuePair
+            {
+                HarassEmote = message,
+                Harasser = Context.Message.Author.Id      
+            };
+
+
+            CommandHandler.HarassList.Add(id, valuePair);
 
             File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.HarassList));
+        }
+
+        [Command("Harassers")]
+        public async Task Harassers()
+        {
+            var builder = new EmbedBuilder()
+                .WithTitle("Current Harass List")
+                .WithCurrentTimestamp();
+            foreach(var value in CommandHandler.HarassList.Keys)
+            {
+                var harasser = Context.Client.GetUser(CommandHandler.HarassList[value].Harasser);
+                var harassed = Context.Client.GetUser(value);
+                var emote = CommandHandler.HarassList[value].HarassEmote;
+
+                builder.AddField(harassed.Username, $"Harasser: {harasser.Mention}\n" +
+                    $"Emote: {Emote.Parse(emote)}");
+            }
+            var embed = builder.Build();
+
+            await ReplyAsync(null, false, embed);
         }
 
         [Command("love")]

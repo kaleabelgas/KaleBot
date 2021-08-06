@@ -250,5 +250,27 @@ namespace KaleBot.Modules
             await (Context.User as SocketGuildUser).AddRoleAsync(role);
             await ReplyAsync($"Successfully added rank {role.Mention} to you.");
         }
+
+        [Command("servers")]
+        public async Task Servers()
+        {
+            List<SocketGuild> guilds = new List<SocketGuild>(Context.Client.Guilds.ToList());
+
+            var builder = new EmbedBuilder()
+               .WithTitle("These are the servers I'm in!")
+               .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl())
+               .WithColor(Color.DarkBlue)
+               .WithCurrentTimestamp()
+               .WithFooter(Context.Guild.Name.ToString());
+
+            foreach (var guild in guilds)
+            {
+                builder.AddField(guild.Name.ToString(), $"{guild.Owner}: {guild.DefaultChannel}");
+            }
+
+
+            var embed = builder.Build();
+            await ReplyAsync(null, false, embed);
+        }
     }
 }

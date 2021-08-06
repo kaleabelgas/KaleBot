@@ -19,6 +19,11 @@ using Newtonsoft.Json;
 
 namespace KaleBot.Services
 {
+    public class ValuePair
+    {
+        public string HarassEmote;
+        public ulong Harasser;
+    }
     public class CommandHandler : DiscordClientService
     {
         private readonly IServiceProvider _provider;
@@ -29,7 +34,7 @@ namespace KaleBot.Services
         public static List<Mute> Mutes = new List<Mute>();
 
         public static Dictionary<string, string> UserCommands = new Dictionary<string, string>();
-        public static Dictionary<ulong, string> HarassList = new Dictionary<ulong, string>();
+        public static Dictionary<ulong, ValuePair> HarassList = new Dictionary<ulong, ValuePair>();
         public static Dictionary<ulong, int> Currency = new Dictionary<ulong, int>();
 
         public static int Multiplier { get; set; }
@@ -73,7 +78,7 @@ namespace KaleBot.Services
         private async Task OnUserMessage(SocketMessage arg)
         {
             var id = arg.Author.Id;
-            if (Currency.Keys.Contains(id))
+            if (!Currency.Keys.Contains(id))
             {
                 Currency.Add(id, 1);
                 return;
@@ -101,7 +106,7 @@ namespace KaleBot.Services
             using (StreamReader file = File.OpenText(@"harasslist.json"))
             {
                 JsonSerializer serializer = new JsonSerializer();
-                var hl = (Dictionary<ulong, string>)serializer.Deserialize(file, typeof(Dictionary<ulong, string>));
+                var hl = (Dictionary<ulong, ValuePair>)serializer.Deserialize(file, typeof(Dictionary<ulong, ValuePair>));
                 if (hl == null) return;
                 HarassList = hl;
             }
@@ -114,7 +119,7 @@ namespace KaleBot.Services
             {
                 return;
             }
-            var emote = Emote.Parse(HarassList[userMessage.Author.Id]);
+            var emote = Emote.Parse(HarassList[userMessage.Author.Id].HarassEmote);
             await userMessage.AddReactionAsync(emote);
             //await userMessage.Channel.SendMessageAsync(HarassList[userMessage.Author.Id]);
         }
