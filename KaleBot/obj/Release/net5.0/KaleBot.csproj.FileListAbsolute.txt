@@ -57,7 +57,6 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\System.Linq.Async.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\runtimes\win\lib\netcoreapp2.0\System.Diagnostics.EventLog.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\Infrastructure.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\Infrastructure.pdb
-D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.csprojAssemblyReference.cache
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.GeneratedMSBuildEditorConfig.editorconfig
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.AssemblyInfoInputs.cache
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.AssemblyInfo.cs
@@ -68,3 +67,6 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\ref\KaleBot.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.pdb
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.genruntimeconfig.cache
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\Victoria.dll
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\customcommands.json
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Release\net5.0\harasslist.json
+D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Release\net5.0\KaleBot.csproj.AssemblyReference.cache

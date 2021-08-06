@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using KaleBot.Services;
 using Infrastructure;
 using KaleBot.Utilities;
+using KaleBot.Modules;
 
 namespace KaleBot
 {
@@ -59,7 +60,8 @@ namespace KaleBot
                     .AddSingleton<Ranks>()
                     .AddSingleton<AutoRoles>()
                     .AddSingleton<RanksHelper>()
-                    .AddSingleton<AutoRolesHelper>();
+                    .AddSingleton<AutoRolesHelper>()
+                    .AddSingleton<Tictactoe>();
                 })
                 .UseConsoleLifetime();
 

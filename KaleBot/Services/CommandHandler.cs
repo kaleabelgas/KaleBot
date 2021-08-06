@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -10,9 +11,11 @@ using Discord.Addons.Hosting;
 using Discord.Commands;
 using Discord.WebSocket;
 using Infrastructure;
+using KaleBot.Modules;
 using KaleBot.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace KaleBot.Services
 {
@@ -25,7 +28,15 @@ namespace KaleBot.Services
         private readonly Servers _servers;
         public static List<Mute> Mutes = new List<Mute>();
 
+        public static Dictionary<string, string> UserCommands = new Dictionary<string, string>();
+        public static Dictionary<ulong, string> HarassList = new Dictionary<ulong, string>();
+        public static Dictionary<ulong, int> Currency = new Dictionary<ulong, int>();
+
+        public static int Multiplier { get; set; }
+
         public static SocketUserMessage LastMessage { get; private set; }
+        public static SocketUserMessage LastMessageEdit { get; private set; }
+
 
         public CommandHandler(DiscordSocketClient client, ILogger<CommandHandler> logger, IServiceProvider provider, CommandService commandService, IConfiguration config, Servers servers) : base(client, logger)
         {
@@ -39,11 +50,18 @@ namespace KaleBot.Services
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _client.MessageReceived += OnMessageReceived;
+            _client.MessageReceived += HarassManager;
             _client.MessageDeleted += SnipeSet;
+            _client.MessageReceived += OnUserMessage;
             _client.MessageDeleted += GhostPingDetect;
+            _client.MessageUpdated += EditDetect;
             _client.ChannelCreated += OnChannelCreated;
             _client.ReactionAdded += OnReactionAdded;
-            _client.Connected += SetActivity;
+
+            _client.Connected += async () => await _client.SetGameAsync($"?help: watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
+            _client.Connected += SetCommandDictionary;
+            _client.Connected += SetHarassDictionary;
+
             _service.CommandExecuted += OnCommandExecuted;
 
             var newTask = new Task(async () => await MuteHandler());
@@ -52,16 +70,65 @@ namespace KaleBot.Services
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
         }
 
-        private async Task SetActivity()
+        private async Task OnUserMessage(SocketMessage arg)
         {
-            await _client.SetGameAsync($"?help: watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
+            var id = arg.Author.Id;
+            if (Currency.Keys.Contains(id))
+            {
+                Currency.Add(id, 1);
+                return;
+            }
 
+            Currency[id] += 1 * Multiplier;
+
+            await Task.CompletedTask;
+        }
+
+        private async Task SetCommandDictionary()
+        {
+            using (StreamReader file = File.OpenText(@"customcommands.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                var cc = (Dictionary<string, string>)serializer.Deserialize(file, typeof(Dictionary<string, string>));
+                if (cc == null) return;
+                UserCommands = cc;
+            }
+            await Task.CompletedTask;
+        }
+
+        private async Task SetHarassDictionary()
+        {
+            using (StreamReader file = File.OpenText(@"harasslist.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                var hl = (Dictionary<ulong, string>)serializer.Deserialize(file, typeof(Dictionary<ulong, string>));
+                if (hl == null) return;
+                HarassList = hl;
+            }
+            await Task.CompletedTask;
+        }
+
+        private async Task HarassManager(SocketMessage userMessage)
+        {
+            if (!HarassList.ContainsKey(userMessage.Author.Id))
+            {
+                return;
+            }
+            var emote = Emote.Parse(HarassList[userMessage.Author.Id]);
+            await userMessage.AddReactionAsync(emote);
+            //await userMessage.Channel.SendMessageAsync(HarassList[userMessage.Author.Id]);
+        }
+
+        private async Task EditDetect(Cacheable<IMessage, ulong> arg1, SocketMessage arg2, ISocketMessageChannel arg3)
+        {
+            LastMessageEdit = arg1.Value as SocketUserMessage;
+            await Task.CompletedTask;
         }
 
         private async Task GhostPingDetect(Cacheable<IMessage, ulong> arg1, ISocketMessageChannel arg2)
         {
             if ((arg1.Value as SocketUserMessage) == null) return;
-            if((arg1.Value as SocketUserMessage).MentionedUsers.Count < 1) { return; }
+            if ((arg1.Value as SocketUserMessage).MentionedUsers.Count < 1) { return; }
 
             var builder = new EmbedBuilder()
                 .WithTitle("Ghost ping detected!")

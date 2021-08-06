@@ -15,39 +15,46 @@ using System;
 using System.Web;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace KaleBot.Modules
 {
     public class GeneralCommands : ModuleBase<SocketCommandContext>
     {
-        private static Dictionary<SocketGuildUser, SocketMessage> harassList = new Dictionary<SocketGuildUser, SocketMessage>();
-
-        [Command("say")]
-        public async Task Say(int amount = 1, [Remainder]string text = "")
+        [Command("cc")]
+        public async Task CustomCommand([Remainder]string command = null)
         {
-            if (amount < 1)
+            if (string.IsNullOrEmpty(command))
             {
-                await ReplyAsync("Tryna break me, are ya?");
+                await ReplyAsync("Command provided is empty.");
+                return;
             }
-            else if (amount > 10)
+            if(!CommandHandler.UserCommands.ContainsKey(command))
             {
-                await ReplyAsync("smh");
+                await ReplyAsync("Custom command does not exist!");
+                return;
             }
-            else if (Context.Message.MentionedUsers.Count > 0)
-            {
-                for (int i = 0; i < amount; i++)
-                {
-                    await ReplyAsync(Context.User.Mention + " tried to ping smh");
-                }
-            }
-            else
-            {
-                for (int i = 0; i < amount; i++)
-                {
-                    await ReplyAsync(text);
-                }
+            var content = CommandHandler.UserCommands[command];
+            await ReplyAsync(CommandHandler.UserCommands[command]);
+        }
 
+
+        [Command("addcc")]
+        public async Task AddCommand(string command, [Remainder]string reply = null)
+        {
+            if(reply == null)
+            {
+                await ReplyAsync("Command cannot be empty.");
+                return;
             }
+            await ReplyAsync("Command added.");
+
+            CommandHandler.UserCommands.Add(command, reply);
+
+            var path = @"customcommands.json";
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.UserCommands));
         }
         [Command("say")]
         public async Task Say([Remainder] string text = "")
@@ -85,16 +92,48 @@ namespace KaleBot.Modules
             await ReplyAsync($"We appreciate you {user.Mention}! ❤️");
         }
 
-        //[Command("Harass")]
-        //public async Task StartHarass(SocketGuildUser user, [Remainder]SocketMessage message)
-        //{
-        //    harassList.Add(user, message);
-        //    Context.Client.MessageReceived += Harass;
-        //}
-
-        public async Task Harass(SocketMessage message)
+        [Command("Harass")]
+        public async Task StartHarass(ulong id, string message)
         {
-            await ReplyAsync($"{harassList[message.Author as SocketGuildUser]}");
+            if (Context.Message.MentionedRoles.Count > 0 || Context.Message.MentionedEveryone)
+            {
+                await ReplyAsync(Context.User.Mention + " tried to ping roles smh");
+                return;
+            }
+            var isEmote = Emote.TryParse(message, out _);
+            if (!isEmote)
+            {
+                await ReplyAsync("You need to provide an actual emote, dude!");
+                return;
+            }
+            await ReplyAsync("Your wish is my command.");
+            var path = @"harasslist.json";
+
+
+            if (CommandHandler.HarassList.ContainsKey(id))
+            {
+                CommandHandler.HarassList[id] = message;
+
+                File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.HarassList));
+                return;
+            }
+            CommandHandler.HarassList.Add(id, message);
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.HarassList));
+        }
+
+        [Command("love")]
+        public async Task EndHarass(ulong id)
+        {
+            var removed = CommandHandler.HarassList.Remove(id);
+            var path = @"harasslist.json";
+            if (!removed)
+            {
+                await ReplyAsync("User not in harass list!");
+                return;
+            }
+            await ReplyAsync("Loved!");
+            File.WriteAllText(path, JsonConvert.SerializeObject(CommandHandler.HarassList));
         }
 
         [Command("ytl", RunMode = RunMode.Async)]
@@ -214,7 +253,37 @@ namespace KaleBot.Modules
                 await ReplyAsync("There's nothing to snipe!");
                 return;
             }
-            await ReplyAsync($"Deleted Message by {CommandHandler.LastMessage.Author.Mention}: {CommandHandler.LastMessage.Content}");
+
+            var builder = new EmbedBuilder()
+                .WithTitle($"Deleted message by {CommandHandler.LastMessage.Author.Username}")
+                .WithDescription($"{CommandHandler.LastMessage.Content}")
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp()
+                .WithFooter(Context.Guild.Name.ToString());
+
+            var embed = builder.Build();
+
+            await ReplyAsync(null, false, embed);
+        }
+
+        [Command("editsnipe")]
+        public async Task EditSnipe()
+        {
+            if (CommandHandler.LastMessageEdit == null)
+            {
+                await ReplyAsync("There's nothing to snipe!");
+                return;
+            }
+            var builder = new EmbedBuilder()
+                .WithTitle($"Edited message by {CommandHandler.LastMessageEdit.Author.Username}")
+                .WithDescription($"{CommandHandler.LastMessageEdit.Content}")
+                .WithColor(Color.DarkBlue)
+                .WithCurrentTimestamp()
+                .WithFooter(Context.Guild.Name.ToString());
+
+            var embed = builder.Build();
+
+            await ReplyAsync(null, false, embed);
         }
 
         [Command("kill")]
@@ -251,37 +320,12 @@ namespace KaleBot.Modules
             var randomUpperLower = new string(final.ToArray());
             await ReplyAsync(randomUpperLower);
         }
-        
-        [Command("coinflip")]
-        public async Task CoinFlip()
-        {
-            var random = new Random();
-
-            var answer = random.Next() % 2  == 0 ? "heads" : "tails";
-
-            await ReplyAsync(answer);
-        }
+       
 
         [Command("type")]
         public async Task Type()
         {
             await Context.Channel.TriggerTypingAsync();
-        }
-        [Command("die")]
-        public async Task Die()
-        {
-            await Context.Channel.TriggerTypingAsync();
-            var random = new Random();
-            await ReplyAsync(random.Next(1, 7).ToString());
-
-        }
-
-        [Command("dice")]
-        public async Task Dice()
-        {
-            await Context.Channel.TriggerTypingAsync();
-            var random = new Random();
-            await ReplyAsync(random.Next(1, 13).ToString());
         }
 
         [Command("av")]

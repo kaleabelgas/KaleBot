@@ -4,7 +4,6 @@ D:\Users\Kale\Documents\KaleBot\Infrastructure\bin\Debug\net5.0\Infrastructure.r
 D:\Users\Kale\Documents\KaleBot\Infrastructure\bin\Debug\net5.0\Infrastructure.dll
 D:\Users\Kale\Documents\KaleBot\Infrastructure\bin\Debug\net5.0\ref\Infrastructure.dll
 D:\Users\Kale\Documents\KaleBot\Infrastructure\bin\Debug\net5.0\Infrastructure.pdb
-D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.csprojAssemblyReference.cache
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.AssemblyInfoInputs.cache
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.AssemblyInfo.cs
@@ -13,3 +12,4 @@ D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.d
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\ref\Infrastructure.dll
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.pdb
 D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.genruntimeconfig.cache
+D:\Users\Kale\Documents\KaleBot\Infrastructure\obj\Debug\net5.0\Infrastructure.csproj.AssemblyReference.cache

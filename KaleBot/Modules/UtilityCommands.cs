@@ -131,7 +131,7 @@ namespace KaleBot.Modules
             if (user == null)
             {
                 var builder = new EmbedBuilder()
-                    .WithTitle($"User info for {(Context.User as SocketGuildUser).Nickname}")
+                    .WithTitle($"User info for {(Context.User as SocketGuildUser).Nickname ?? Context.User.Username}")
                     .WithThumbnailUrl(Context.User.GetAvatarUrl())
                     .WithColor(Color.DarkBlue)
                     .AddField($"User", Context.User, true)
@@ -147,7 +147,7 @@ namespace KaleBot.Modules
             else
             {
                 var builder = new EmbedBuilder()
-                    .WithTitle($"User info for {user.Nickname}")
+                    .WithTitle($"User info for {user.Nickname ?? user.Username}")
                     .WithThumbnailUrl(user.GetAvatarUrl())
                     .WithColor(Color.DarkBlue)
                     .AddField($"User", user.Username, true)
