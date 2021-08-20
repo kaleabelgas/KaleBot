@@ -412,5 +412,8 @@ namespace KaleBot.Modules
             var embed = builder.Build();
             await Context.Channel.SendMessageAsync(null, false, embed);
         }
+
+        
+
     }
 }

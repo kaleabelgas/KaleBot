@@ -35,9 +35,9 @@ namespace KaleBot.Services
 
         public static Dictionary<string, string> UserCommands = new Dictionary<string, string>();
         public static Dictionary<ulong, ValuePair> HarassList = new Dictionary<ulong, ValuePair>();
-        public static Dictionary<ulong, int> Currency = new Dictionary<ulong, int>();
+        public static Dictionary<ulong, int> Economy = new Dictionary<ulong, int>();
 
-        public static int Multiplier { get; set; }
+        public static int Multiplier { get; set; } = 1;
 
         public static SocketUserMessage LastMessage { get; private set; }
         public static SocketUserMessage LastMessageEdit { get; private set; }
@@ -66,6 +66,7 @@ namespace KaleBot.Services
             _client.Connected += async () => await _client.SetGameAsync($"?help: watching over {_client.Guilds.Count} servers!", null, ActivityType.Playing);
             _client.Connected += SetCommandDictionary;
             _client.Connected += SetHarassDictionary;
+            _client.Connected += SetEconomyDictionary;
 
             _service.CommandExecuted += OnCommandExecuted;
 
@@ -78,14 +79,32 @@ namespace KaleBot.Services
         private async Task OnUserMessage(SocketMessage arg)
         {
             var id = arg.Author.Id;
-            if (!Currency.Keys.Contains(id))
+            var path = @"economy.json";
+
+            if (!Economy.Keys.Contains(id))
             {
-                Currency.Add(id, 1);
+                Economy.Add(id, 1);
+                File.WriteAllText(path, JsonConvert.SerializeObject(Economy));
                 return;
             }
 
-            Currency[id] += 1 * Multiplier;
+            Economy[id] += 1 * Multiplier;
 
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(Economy));
+
+            await Task.CompletedTask;
+        }
+
+        private async Task SetEconomyDictionary()
+        {
+            using (StreamReader file = File.OpenText(@"economy.json"))
+            {
+                JsonSerializer serializer = new JsonSerializer();
+                var cc = (Dictionary<ulong, int>)serializer.Deserialize(file, typeof(Dictionary<ulong, int>));
+                if (cc == null) return;
+                Economy = cc;
+            }
             await Task.CompletedTask;
         }
 
@@ -120,6 +139,7 @@ namespace KaleBot.Services
                 return;
             }
             var emote = Emote.Parse(HarassList[userMessage.Author.Id].HarassEmote);
+            Task.Delay(200);
             await userMessage.AddReactionAsync(emote);
             //await userMessage.Channel.SendMessageAsync(HarassList[userMessage.Author.Id]);
         }
@@ -186,7 +206,8 @@ namespace KaleBot.Services
 
         private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            if (command.IsSpecified && !result.IsSuccess) Console.WriteLine(result);
+            if (command.IsSpecified) Console.WriteLine($"{context.Message.Author.Username} used {command.Value.Name}!\n" +
+                $"Context: {context.Message.Content}");
             await Task.CompletedTask;
         }
 
