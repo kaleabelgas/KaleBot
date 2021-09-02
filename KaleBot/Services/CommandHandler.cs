@@ -67,6 +67,16 @@ namespace KaleBot.Services
             _client.Connected += SetCommandDictionary;
             _client.Connected += SetHarassDictionary;
             _client.Connected += SetEconomyDictionary;
+            _client.Connected += async () =>
+            {
+                using (StreamReader file = File.OpenText(@"counting.json"))
+                {
+                    JsonSerializer jsonSerializer = new JsonSerializer();
+                    int num = (int)jsonSerializer.Deserialize(file, typeof(int));
+                    GamesData.LastNumber = num;
+                }
+                await Task.CompletedTask;
+            };
 
             _service.CommandExecuted += OnCommandExecuted;
 

@@ -95,7 +95,7 @@ namespace KaleBot.Modules
         }
 
         [Command("clear")]
-        //[RequireUserPermission(GuildPermission.ManageMessages)]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task Clear(int amount)
         {
             var messages = await Context.Channel.GetMessagesAsync(amount + 1).FlattenAsync();

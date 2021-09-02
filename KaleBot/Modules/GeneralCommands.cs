@@ -183,7 +183,7 @@ namespace KaleBot.Modules
             });
 
             var searchRequest = youtubeService.Search.List("snippet");
-            searchRequest.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.Strict;
+            searchRequest.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None;
             searchRequest.Order = SearchResource.ListRequest.OrderEnum.Relevance;
             searchRequest.RegionCode = "US";
             searchRequest.Type = "video";
@@ -243,7 +243,7 @@ namespace KaleBot.Modules
             var searchRequest = youtubeService.Search.List("snippet");
 
             searchRequest.Q = query;
-            searchRequest.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.Strict;
+            searchRequest.SafeSearch = SearchResource.ListRequest.SafeSearchEnum.None;
             searchRequest.Order = SearchResource.ListRequest.OrderEnum.Relevance;
             searchRequest.RegionCode = "US";
             searchRequest.Type = "video";
@@ -260,17 +260,7 @@ namespace KaleBot.Modules
 
             var result = HttpUtility.HtmlDecode(searchResponse.Items[0].Snippet.Title);
 
-
-            var builder = new EmbedBuilder()
-                .WithTitle($"YouTube search result for \"{query}\"")
-                .WithColor(Color.DarkBlue)
-                .WithImageUrl(searchResponse.Items[0].Snippet.Thumbnails.High.Url)
-                .WithDescription($"[**{result}**](https://www.youtube.com/watch?v={searchResponse.Items[0].Id.VideoId})")
-                .WithCurrentTimestamp()
-                .WithFooter(Context.Guild.Name.ToString());
-            var embed = builder.Build();
-
-            await ReplyAsync(null, false, embed);
+            await ReplyAsync($"https://www.youtube.com/watch?v={searchResponse.Items[0].Id.VideoId}");
         }
 
 

@@ -71,3 +71,4 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\customcommands.json
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\harasslist.json
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Debug\net5.0\KaleBot.csproj.AssemblyReference.cache
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\economy.json
+D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\counting.json

@@ -16,15 +16,6 @@ namespace KaleBot.Modules
 {
     public class Games : ModuleBase<SocketCommandContext>
     {
-
-        [Command("tictactoe")]
-        public async Task Tictactoe(SocketUser user)
-        {
-            //Tictactoe tictactoe = new Tictactoe(Context.Message.Author, user);
-            //Context.Client.MessageReceived += tictactoe.ReveiveInput;
-            await Task.CompletedTask;
-        }
-
         [Command("top")]
         public async Task GetTopUsers()
         {
@@ -87,7 +78,140 @@ namespace KaleBot.Modules
                 myrank++;
                 continue;
             }
+        }
 
+        
+
+        [Command("Guess")]
+        public async Task Guess(int numLength = 1)
+        {
+            if (GamesData.GuessGameOngoing)
+            {
+                await ReplyAsync("A game is ongoing!");
+                return;
+            }
+
+            if (numLength < 1)
+            {
+                await ReplyAsync("Number of digits cannot be negative or zero.");
+                return;
+            }
+            if (numLength > 10)
+            {
+                await ReplyAsync($"Dude, too much! Number cannot be more than {int.MaxValue}");
+                return;
+            }
+
+            GamesData.GuessGameOngoing = true;
+            GamesData.GuessContext = Context;
+            GamesData.GuessingChannel = GamesData.GuessContext.Channel;
+
+            var random = new Random();
+
+            GamesData.NumberToGuess = random.Next(0, (int)Math.Pow(10, numLength) - 1);
+
+            GamesData.GuessContext.Client.MessageReceived += GuessListener;
+
+            await ReplyAsync($"Guessing game started. Number length: {numLength} digit.");
+
+        }
+
+        [Command("Guess")]
+        public async Task Guess(string param)
+        {
+            if (param.Equals("stop"))
+            {
+                await ReplyAsync($"Game stopped. Number: {GamesData.NumberToGuess}");
+                GamesData.GuessGameOngoing = false;
+                GamesData.GuessContext.Client.MessageReceived -= GuessListener;
+                return;
+            }
+        }
+
+        private async Task GuessListener(SocketMessage arg)
+        {
+            //await Task.Delay(100);
+            if (arg.Content.StartsWith("?")) return;
+            if (!(arg is SocketUserMessage message)) return;
+            if (message.Source != MessageSource.User) return;
+            if (!GamesData.GuessGameOngoing) return;
+            if (arg.Channel != GamesData.GuessingChannel) return;
+
+            if (int.TryParse(arg.Content, out int num))
+            {
+                if (num == GamesData.NumberToGuess)
+                {
+                    await ReplyAsync("You got it right! Num: " + GamesData.NumberToGuess);
+                    GamesData.GuessContext.Client.MessageReceived -= GuessListener;
+                    GamesData.GuessGameOngoing = false;
+                }
+                else
+                {
+                    string numberIs = "";
+
+                    if (num > GamesData.NumberToGuess)
+                    {
+                        numberIs = "lower.";
+                    }
+                    else
+                    {
+                        numberIs = "higher.";
+                    }
+
+                    await ReplyAsync($"Try again! Number is: {numberIs}");
+                }
+                return;
+            }
+
+            //string exception = "";
+
+            //try
+            //{
+            //    int numbr = int.Parse(arg.Content);
+            //}
+            //catch(Exception ex)
+            //{
+            //    exception = ex.ToString();
+            //}
+
+            //exception = exception.Split(new[] { '\r', '\n' }).FirstOrDefault();
+
+            //await ReplyAsync($"That's not a number! Reason: {exception}");
+        }
+
+        [Command("lightshot")]
+        public async Task LightShot(int screenshots)
+        {
+            var random = new Random();
+
+            for (int i = 0; i < screenshots; i++)
+            {
+                string text = "";
+                for (int j = 0; j < 6; j++)
+                {
+                    int index = random.Next(0, GamesData.AlphaNumeric.Length);
+                    text += GamesData.AlphaNumeric[index];
+                }
+                await ReplyAsync($"https://prnt.sc/{text}");
+                await Task.Delay(500);
+            }
+        }
+        [Command("ytr")]
+        public async Task YoutubeRandom(int amount = 1)
+        {
+            var random = new Random();
+
+            for (int i = 0; i < amount; i++)
+            {
+                string text = "";
+                for (int j = 0; j < 11; j++)
+                {
+                    int index = random.Next(0, GamesData.AlphaNumeric.Length);
+                    text += GamesData.AlphaNumeric[index];
+                }
+                await ReplyAsync($"https://www.youtube.com/watch?v={text}");
+                await Task.Delay(1500);
+            }
         }
     }
 

@@ -42,6 +42,7 @@ namespace KaleBot
                         LogLevel = LogSeverity.Info, // Defines what kind of information should be logged from the API (e.g. Verbose, Info, Warning, Critical) adjust this to your liking
                         AlwaysDownloadUsers = true,
                         MessageCacheSize = 200,
+                        ExclusiveBulkDelete = true,
                     };
 
                     config.Token = context.Configuration["token"];
@@ -60,8 +61,7 @@ namespace KaleBot
                     .AddSingleton<Ranks>()
                     .AddSingleton<AutoRoles>()
                     .AddSingleton<RanksHelper>()
-                    .AddSingleton<AutoRolesHelper>()
-                    .AddSingleton<Tictactoe>();
+                    .AddSingleton<AutoRolesHelper>();
                 })
                 .UseConsoleLifetime();
 

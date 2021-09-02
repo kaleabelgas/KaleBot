@@ -272,5 +272,18 @@ namespace KaleBot.Modules
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
         }
+
+        [RequireUserPermission(ChannelPermission.ManageMessages)]
+        [Command("dc")]
+        public async Task Disconnect()
+        {
+            await ReplyAsync("Shutting down.");
+            await Task.Delay(1000);
+
+            await Context.Client.StopAsync();
+            await Context.Client.LogoutAsync();
+
+            Environment.Exit(0);
+        }
     }
 }
