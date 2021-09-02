@@ -53,7 +53,7 @@ namespace KaleBot.Services
             _client.MessageReceived += OnMessageReceived;
             _client.MessageReceived += HarassManager;
             _client.MessageDeleted += SnipeSet;
-            _client.MessageReceived += OnUserMessage;
+            _client.MessageReceived += UpdateEconomy;
             _client.MessageDeleted += GhostPingDetect;
             _client.MessageUpdated += EditDetect;
             _client.ChannelCreated += OnChannelCreated;
@@ -79,7 +79,7 @@ namespace KaleBot.Services
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
         }
 
-        private async Task OnUserMessage(SocketMessage arg)
+        private async Task UpdateEconomy(SocketMessage arg)
         {
             var id = arg.Author.Id;
             var path = @"economy.json";
@@ -142,7 +142,7 @@ namespace KaleBot.Services
                 return;
             }
             var emote = Emote.Parse(HarassList[userMessage.Author.Id].HarassEmote);
-            Task.Delay(200);
+            await Task.Delay(200);
             await userMessage.AddReactionAsync(emote);
             //await userMessage.Channel.SendMessageAsync(HarassList[userMessage.Author.Id]);
         }
@@ -195,12 +195,12 @@ namespace KaleBot.Services
 
         private async Task OnMessageReceived(SocketMessage arg)
         {
-            //bool bruh = (arg is SocketUserMessage message);
             if (!(arg is SocketUserMessage message)) return;
             if (message.Source != MessageSource.User) return;
 
+
             var argPos = 0;
-            var prefix = _config["prefix"] ?? "?";
+            var prefix = "?";
             if (!message.HasStringPrefix(prefix, ref argPos) && !message.HasMentionPrefix(_client.CurrentUser, ref argPos)) return;
 
             var context = new SocketCommandContext(_client, message);

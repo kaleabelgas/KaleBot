@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using KaleBot.Services;
-using Infrastructure;
 using KaleBot.Utilities;
 using KaleBot.Modules;
 
@@ -52,16 +51,9 @@ namespace KaleBot
                     config.CaseSensitiveCommands = false;
                     config.LogLevel = LogSeverity.Info;
                     config.DefaultRunMode = RunMode.Sync;
-                })
-                .ConfigureServices((context, services) =>
+                }).ConfigureServices((context, services) =>
                 {
-                    services.AddHostedService<CommandHandler>()
-                    .AddDbContext<KaleBotContext>()
-                    .AddSingleton<Servers>()
-                    .AddSingleton<Ranks>()
-                    .AddSingleton<AutoRoles>()
-                    .AddSingleton<RanksHelper>()
-                    .AddSingleton<AutoRolesHelper>();
+                    services.AddHostedService<CommandHandler>();
                 })
                 .UseConsoleLifetime();
 

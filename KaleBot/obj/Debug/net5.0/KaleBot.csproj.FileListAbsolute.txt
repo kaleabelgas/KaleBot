@@ -51,16 +51,6 @@ D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Debug\net5.0\ref\KaleBot.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Debug\net5.0\KaleBot.pdb
 D:\Users\Kale\Documents\KaleBot\KaleBot\obj\Debug\net5.0\KaleBot.genruntimeconfig.cache
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\appsettings.json
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Abstractions.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Relational.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Microsoft.Extensions.Caching.Abstractions.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Microsoft.Extensions.Caching.Memory.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\MySqlConnector.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Pomelo.EntityFrameworkCore.MySql.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Infrastructure.dll
-D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Infrastructure.pdb
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.PlatformServices.dll
 D:\Users\Kale\Documents\KaleBot\KaleBot\bin\Debug\net5.0\Google.Apis.Auth.dll

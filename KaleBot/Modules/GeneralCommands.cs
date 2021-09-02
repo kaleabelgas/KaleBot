@@ -14,11 +14,20 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace KaleBot.Modules
 {
     public class GeneralCommands : ModuleBase<SocketCommandContext>
     {
+
+        private readonly IConfiguration _config;
+
+        public GeneralCommands (IConfiguration config)
+        {
+            _config = config;
+        }
+
         [Command("cc")]
         public async Task CustomCommand([Remainder]string command = null)
         {
@@ -174,7 +183,7 @@ namespace KaleBot.Modules
 
             var youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {
-                ApiKey = "AIzaSyA9MwwtfSa5oXUrPfdoKK85V05-zlRn7qo",
+                ApiKey = _config["yt"],
                 ApplicationName = this.GetType().ToString()
 
             });
@@ -232,7 +241,7 @@ namespace KaleBot.Modules
 
             var youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {
-                ApiKey = "AIzaSyA9MwwtfSa5oXUrPfdoKK85V05-zlRn7qo",
+                ApiKey = _config["yt"],
                 ApplicationName = this.GetType().ToString()
 
             });
