@@ -4,11 +4,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Infrastructure;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using KaleBot.Services;
-using KaleBot.Utilities;
 using System;
 
 namespace KaleBot.Modules
@@ -16,25 +13,20 @@ namespace KaleBot.Modules
     public class UtilityCommands : ModuleBase<SocketCommandContext>
     {
         private readonly ILogger<UtilityCommands> _logger;
-        private readonly Servers _servers;
-        private readonly RanksHelper _ranksHelper;
 
-        public UtilityCommands(ILogger<UtilityCommands> logger, Servers servers, RanksHelper ranksHelper)
+        public UtilityCommands(ILogger<UtilityCommands> logger)
         {
             _logger = logger;
-            _ranksHelper = ranksHelper;
-            _servers = servers;
         }
 
         [Command("help")]
         public async Task Help(string query = "")
         {
-            var guildPrefix = await _servers.GetGuildPrefix(Context.Guild.Id) ?? "?";
             if (string.IsNullOrEmpty(query))
             {
                 var _builder = new EmbedBuilder()
                     .WithTitle("KaleBot Help")
-                    .WithDescription($"For more information about a command, use {guildPrefix}help + command")
+                    .WithDescription($"For more information about a command, use ?help + command")
                     .AddField("Available Commands",
                     $"> ping\n" +
                     $"> prefix\n" +
@@ -63,11 +55,11 @@ namespace KaleBot.Modules
                     break;
                 case "prefix":
                     info = "Get or set the bot prefix for this server";
-                    addInfo = $", {guildPrefix}prefix !";
+                    addInfo = $", ?prefix !";
                     break;
                 case "info":
                     info = "Gets info of user mentioned. Defaults to sender profile.";
-                    addInfo = $", {guildPrefix}info {Context.Client.CurrentUser.Mention}";
+                    addInfo = $", ?info {Context.Client.CurrentUser.Mention}";
                     break;
                 case "server":
                     info = "Gets server info.";
@@ -95,7 +87,7 @@ namespace KaleBot.Modules
                 .WithColor(Color.DarkBlue)
                 .WithCurrentTimestamp()
                 .WithFooter(Context.Guild.Name.ToString());
-            if (commandValid) builder.AddField("Usage", $"`{guildPrefix}{query}{addInfo}`");
+            if (commandValid) builder.AddField("Usage", $"`?{query}{addInfo}`");
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
         }
@@ -202,53 +194,6 @@ namespace KaleBot.Modules
                 .WithFooter(Context.Guild.Name.ToString());
             var embed = builder.Build();
             await ReplyAsync(null, false, embed);
-        }
-
-        [Command("rank", RunMode = RunMode.Async)]
-        [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Rank([Remainder]string identifier)
-        {
-            await Context.Channel.TriggerTypingAsync();
-
-            var ranks = await _ranksHelper.GetRanksAsync(Context.Guild);
-
-            IRole role;
-
-            if(ulong.TryParse(identifier, out ulong roleId))
-            {
-                var roleById = Context.Guild.Roles.FirstOrDefault(x => x.Id == roleId);
-                if(roleById == null)
-                {
-                    await ReplyAsync("Role does not exist!");
-                    return;
-                }
-                role = roleById;
-            }
-            else
-            {
-                var roleByName = Context.Guild.Roles.FirstOrDefault(x => string.Equals(x.Name, identifier, StringComparison.CurrentCultureIgnoreCase));
-                if(roleByName == null)
-                {
-                    await ReplyAsync("Role does not exist!");
-                    return;
-                }
-                role = roleByName;
-            }
-
-            if(ranks.All(x => x.Id != role.Id))
-            {
-                await ReplyAsync("That rank does not exist!");
-                return;
-            }
-
-            if((Context.User as SocketGuildUser).Roles.Any(x => x.Id == role.Id))
-            {
-                await (Context.User as SocketGuildUser).RemoveRoleAsync(role);
-                await ReplyAsync($"Successfully removed rank {role.Mention} from you.");
-                return;
-            }
-            await (Context.User as SocketGuildUser).AddRoleAsync(role);
-            await ReplyAsync($"Successfully added rank {role.Mention} to you.");
         }
 
         [Command("servers")]

@@ -1,16 +1,8 @@
-﻿using System.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Infrastructure;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using KaleBot.Services;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
-using Google.Apis;
 using System;
 using KaleBot.Utilities;
 
@@ -61,7 +53,6 @@ namespace KaleBot.Modules
                 }
             }
 
-            CommandHandler.Mutes.Add(new Mute { Guild = Context.Guild, User = user, End = DateTime.Now + TimeSpan.FromMinutes(minutes), Role = role });
             await user.AddRoleAsync(role);
             await Context.Channel.SendSuccessAsync($"Muted {user.Username}", $"Duration: {minutes} minutes\nReason: {reason ?? "None"}");
         }

@@ -1,12 +1,6 @@
-﻿using System.Data;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using Infrastructure;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using KaleBot.Services;
 using System;
 
 namespace KaleBot.Modules

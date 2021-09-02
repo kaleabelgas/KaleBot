@@ -3,14 +3,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using KaleBot.Services;
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace KaleBot.Modules
 {
